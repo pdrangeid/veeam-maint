@@ -1,16 +1,14 @@
 <# 
 .SYNOPSIS 
  Enable all scheduled Veeam Jobs previously diables with disable-veeam-job-schedules.  Read the jobs in
- HKEY_LOCAL_MACHINE\SOFTWARE\Veeam\Temporarily Disabled Jobs\[JOB NAME] enable the jobs, and remove the registry entries
-
- Note this script WILL NOT stop currently running jobs, but simply prevent future scheduled jobs from starting.  This is
+ HKEY_LOCAL_MACHINE\SOFTWARE\Veeam\Temporarily Disabled Jobs\[JOB NAME] enable the jobs, and remove the registry entries.
 
 .DESCRIPTION 
  
   
 .NOTES 
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐ 
-│ enable-veeam-job-schedules.ps1                                                             │ 
+│ enable-veeam-job-schedules.ps1                                                              │ 
 ├─────────────────────────────────────────────────────────────────────────────────────────────┤ 
 │   DATE        : 2019.1.4  				               									  │ 
 │   AUTHOR      : Paul Drangeid 			                   								  │ 

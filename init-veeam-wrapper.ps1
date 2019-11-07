@@ -32,6 +32,8 @@ param (
     [int]$verbosity
     )
 
+    if ($null -eq $verbosity){[int]$verbosity=1} #verbosity level is 1 by default
+
 Try{. "$PSScriptRoot\bg-sharedfunctions.ps1" | Out-Null}
 
 Catch{

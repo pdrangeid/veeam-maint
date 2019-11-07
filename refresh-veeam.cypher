@@ -1,9 +1,3 @@
-// SECTION Delete Veeam nodes
-//MATCH (vvm:Veeamprotectedvm) detach delete vvm;
-//MATCH (vs:Veeamserver) detach delete vs;
-//MATCH (vb:Veeambackup) detach delete vb;
-//MATCH (vf:Veeamprotectedfolder) detach delete vf;
-//MATCH (vj:Veeamjob) detach delete vj;
 
 // SECTION Create Indexes and Contraints
 CREATE CONSTRAINT ON (vs:Veeamserver) ASSERT vs.UID IS UNIQUE;
@@ -13,7 +7,6 @@ CREATE INDEX ON :Veeamjob(name);
 CREATE INDEX ON :Veeamprotectedvm(name);
 CREATE INDEX ON :Veeamprotectedvm(id);
 CREATE CONSTRAINT ON (vb:Veeambackup) ASSERT vb.name IS UNIQUE;
-
 
 // SECTION Create (:Veeamserver) nodes
 WITH "base-veeam-api-url/backupservers" as url
@@ -46,7 +39,7 @@ CALL apoc.load.jsonParams(link.Href,{Accept:"application/json",`X-RestSvcSession
 WITH *,"[^A-Za-z\\d-. ]{1,63}" as regex1
 unwind value.HierarchyItems as vmobject
 WITH *,trim(apoc.text.regreplace(vmobject.ObjectName,regex1,'')) as cleanedname,split(vmobject.ObjectRef,'.')[1] as vmid
-MERGE (vvm:Veeamprotectedvm {id:vmid,name:cleanedname})
+MERGE (vvm:Veeamprotectedvm {id:vmid,name:cleanedname}) SET vvm.creation='VeeamAPI lookupSvc function'
 FOREACH (ignoreMe in CASE WHEN not vmobject.ObjectRef in coalesce(vvm.vobjid,[]) then [1] ELSE [] END | SET vvm.vobjid=coalesce(vvm.vobjid,[]) + vmobject.ObjectRef)
 RETURN vvm;
 
@@ -179,6 +172,7 @@ FOREACH (ignoreMe in CASE WHEN jobobject.HierarchyObjRef contains ':Vm:' then [1
 FOREACH (ignoreMe in CASE WHEN jobobject.HierarchyObjRef contains ':Folder:' then [1] ELSE [] END | MERGE (vf:Veeamprotectedfolder {id:jobobject.HierarchyObjRef}) MERGE (vf)-[r:INCLUDED_IN_VEEAM_JOB]->(vj) SET vf.name=jobobject.Name,vf.href=jobobject.Href)
 RETURN *;
 
+
 // SECTION Parse backupsession data (last 14 days) to associate vms with backup jobs
 WITH 14*(86400000) as backupage
 WITH timestamp()-backupage as oldestbackup
@@ -194,9 +188,9 @@ FOREACH (ignoreMe in CASE WHEN exists(vs.name) and exists(vj.name) then [1] ELSE
 WITH vj,vs,sessionlink.Href as url where sessionlink.Type='BackupTaskSessionReferenceList'
 CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value
 WITH *,"[^A-Za-z\\d-. ]{1,63}" as regex1
-UNWIND value.refs as sessionvm
-WITH * ,split(sessionvm.ObjectRef,'.')[1] as vmid,trim(apoc.text.regreplace(split(sessionvm.Name,'@')[0],regex1,'')) as cleanedname where sessionvm.Type='BackupTaskSessionReference'
-MATCH (vvm:Veeamprotectedvm {id:vmid,name:cleanedname})
+UNWIND value.Refs as sessionvm
+WITH *, trim(apoc.text.regreplace(split(sessionvm.Name,'@')[0],regex1,'')) as cleanedname where sessionvm.Type='BackupTaskSessionReference'
+MATCH (vvm:Veeamprotectedvm {name:cleanedname})
 MERGE (vvm)-[r:INCLUDED_IN_VEEAM_JOB]->(vj)
 FOREACH (ignoreMe in CASE WHEN not exists(r.lastjobsession) or split(sessionvm.Name,'@')[1] > r.lastjobsession then [1] ELSE [] END | SET r.lastjobsession=split(sessionvm.Name,'@')[1])
 return vj,vs,vvm;

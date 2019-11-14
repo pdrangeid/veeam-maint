@@ -71,7 +71,7 @@ FOREACH (ignoreMe in CASE WHEN exists(vbs.name) and vbs.name <> '' then [1] ELSE
 WITH vb,link where link.Type='Backup'
 MATCH (vj:Veeamjob {name:link.Name}) WHERE (vj)--(:Veeamserver)--(vb)
 MERGE (vb)-[:PART_OF_JOB]->(vj)
-return link,vj.name,vb.name
+return link,vj.name,vb.name;
 
 // move the .pendingupdate property to .lastupdate
 MATCH (vsr:Veeamserver) where toLower(vsr.apiurl)=toLower('base-veeam-api-url')

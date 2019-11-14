@@ -7,18 +7,28 @@ By providing the Veeam API URL, the credentials for Veeam and Neo4j, a session w
 with labels, properties and relationships between Veeam servers, jobs, restoration points, and protected VMs. 
 
 example:
-./init-veeam-wrapper.ps1 -baseapiurl "htttp://myveeamserver.mydomain.com:9399" -veeamcred myveeam -neo4jdatasource myneo4jserver
+./init-veeam-wrapper.ps1 -baseapiurl "htttp://myveeamserver.mydomain.com:9399" -veeamcred myveeam -neo4jdatasource myneo4jserver -days 7
 
 The veeamcred and neo4jdatasource profiles must have already been created using the set-regcredentials.ps1 and must have been
 run as the same user account that is running init-veeam-wrapper.ps1
 
 .NOTES 
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐ 
-│ init-veeam-wrapper.ps1                                                                      │ 
+│ get-datawarehouse-cache.ps1                                                                 │ 
 ├─────────────────────────────────────────────────────────────────────────────────────────────┤ 
-│   DATE        : 11.03.2019 				               									  │ 
+│   DATE        : 11.14.2019 				               									  │ 
 │   AUTHOR      : Paul Drangeid 			                   								  │ 
 │   SITE        : https://blog.graphcommit.com/                                               │ 
+│   PARAMETERS  : -baseapiurl                  :URL of your Veeam API including port          │ 
+│               : -veeamcred                   :Name of Veeam credential                      │ 
+│               : -neo4jdatasource             :Datasource name for n4j location and creds    │ 
+│               : -nsessionkey                 :Don't run the script, just supply a valid key │ 
+│               : -verbosity                   :Level of on-screen messaging (0-4)            │ 
+│               : -days                        :If 1st run how many days of backups to query  │ 
+│   PREREQS     :                                                                             │ 
+│               : RVTools (https://www.robware.net/rvtools/) v 3.11.6 or newer                │ 
+│               : Other scrpit modules:                                                       │ 
+│               : see SITE above for other modules needed to run this                         │ 
 └─────────────────────────────────────────────────────────────────────────────────────────────┘ 
 #> 
 
@@ -29,10 +39,13 @@ param (
     [string]$veeamcred,
     [string]$neo4jdatasource,
     [switch]$sessionkey,
-    [int]$verbosity
+    [int]$verbosity,
+    [int]$days
     )
 
     if ($null -eq $verbosity){[int]$verbosity=1} #verbosity level is 1 by default
+
+    if ($null -eq $days){[int]$days=7} #days is 7 by default
 
 Try{. "$PSScriptRoot\bg-sharedfunctions.ps1" | Out-Null}
 
@@ -70,7 +83,7 @@ if ($sessionkey -eq $true){
 
 $scriptpath = -join ($PSScriptRoot,"\get-cypher-results.ps1")
 $csp= -join ($PSScriptRoot,'\refresh-veeam.cypher')
-$findstring='{"base-veeam-api-url":"'+$baseapiurl+'","veeam-restsvc-sessionid":"'+$veeamapisession+'"}'
+$findstring='{"base-veeam-api-url":"'+$baseapiurl+'","veeam-restsvc-sessionid":"'+$veeamapisession+'","restorepointsmaxage":"'+$days+'"}'
 Show-onscreen $("`nExecuting the following:`n. $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity $verbosity`n ") 4
 #$result = . $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity 4
 . $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity $verbosity

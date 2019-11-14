@@ -8,7 +8,7 @@ CREATE INDEX ON :Veeamprotectedvm(id);
 CREATE CONSTRAINT ON (vb:Veeambackup) ASSERT vb.name IS UNIQUE;
 
 // SECTION Create (:Veeamserver) nodes
-WITH "base-veeam-api-url/backupservers" as url
+WITH "base-veeam-api-url/backupservers?format=Entity" as url
 CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value
 unwind value.BackupServers as backupserver
 MERGE (vs:Veeamserver {id:backupserver.UID}) SET vs.name=backupserver.Name, vs.description=backupserver.Description,vs.version=vs.Version

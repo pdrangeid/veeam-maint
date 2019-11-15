@@ -5,7 +5,7 @@
 MATCH (vpvm:Veeamprotectedvm) REMOVE vpvm.lastgoodbackup;
 
 //set the last good restorepoint value for each Veeamprotectedvm object
-MATCH (vvm:Veeambackup)--(vpvm:Veeamprotectedvm)
+MATCH (vvm:Veeambackup)--(vpvm:Veeamprotectedvm) WHERE (vvm)--(:Veeamjob {type:'Backup'})
 WITH vvm,vpvm
 ORDER BY vvm.creationtime DESC
 WITH vpvm,collect(vvm.creationtime)[0] as maxtime

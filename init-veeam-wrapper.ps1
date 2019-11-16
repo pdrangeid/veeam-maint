@@ -84,7 +84,7 @@ if ($sessionkey -eq $true){
 
 $scriptpath = -join ($PSScriptRoot,"\get-cypher-results.ps1")
 $csp= -join ($PSScriptRoot,'\refresh-veeam.cypher')
-if ($init -eq $true){}
+if ($init -eq $true){
 $csp= -join ($PSScriptRoot,'\init-veeam.cypher')}
 $findstring='{"base-veeam-api-url":"'+$baseapiurl+'","veeam-restsvc-sessionid":"'+$veeamapisession+'","restorepointsmaxage":"'+$days+'"}'
 Show-onscreen $("`nExecuting the following:`n. $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity $verbosity`n ") 4

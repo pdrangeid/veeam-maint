@@ -40,7 +40,8 @@ param (
     [string]$neo4jdatasource,
     [switch]$sessionkey,
     [int]$verbosity,
-    [int]$days
+    [int]$days,
+    [switch]$init
     )
 
     if ($null -eq $verbosity){[int]$verbosity=1} #verbosity level is 1 by default
@@ -83,6 +84,8 @@ if ($sessionkey -eq $true){
 
 $scriptpath = -join ($PSScriptRoot,"\get-cypher-results.ps1")
 $csp= -join ($PSScriptRoot,'\refresh-veeam.cypher')
+if ($init -eq $true){}
+$csp= -join ($PSScriptRoot,'\init-veeam.cypher')}
 $findstring='{"base-veeam-api-url":"'+$baseapiurl+'","veeam-restsvc-sessionid":"'+$veeamapisession+'","restorepointsmaxage":"'+$days+'"}'
 Show-onscreen $("`nExecuting the following:`n. $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity $verbosity`n ") 4
 #$result = . $scriptPath -Datasource $neo4jdatasource -cypherscript $csp -logging $neo4jdatasource -findrep $findstring -verbosity 4

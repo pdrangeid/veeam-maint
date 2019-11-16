@@ -29,7 +29,7 @@ CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"v
 unwind value.Links as link
 WITH link where link.Type='HierarchyItemList' and link.Href ends with '=Vm'
 CALL apoc.load.jsonParams(link.Href,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value
-WITH *,"[^A-Za-z\\d-. ]{1,63}" as regex1
+WITH *,"[^A-Za-z\\d-. _-]{1,63}" as regex1
 unwind value.HierarchyItems as vmobject
 WITH *,trim(apoc.text.regreplace(vmobject.ObjectName,regex1,'')) as cleanedname,split(vmobject.ObjectRef,'.')[1] as vmid
 MERGE (vvm:Veeamprotectedvm {id:vmid,name:cleanedname}) SET vvm.creation='VeeamAPI lookupSvc function'

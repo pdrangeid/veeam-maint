@@ -49,7 +49,7 @@ MATCH (vsr:Veeamserver) where toLower(vsr.apiurl)=toLower('base-veeam-api-url') 
 WITH vsr,restorepointsmaxage*(86400000) as backupage,timestamp() AS howsoonisnow
 WITH howsoonisnow,coalesce(vsr.lastupdate,timestamp()-backupage) as oldestbackup
 WITH howsoonisnow,apoc.date.format(oldestbackup,'ms',"yyyy-MM-dd'T'HH:mm:ss'Z'") as backupdate
-MATCH (vvm:Veeamprotectedvm) where not (vvm)--(:Veeambackup)--(:Veeamjob {type:'Backup'})
+MATCH (vvm:Veeamprotectedvm)// where not (vvm)--(:Veeambackup)--(:Veeamjob {type:'Backup'})
 UNWIND vvm.vobjid as vobjid
 WITH howsoonisnow,vvm,backupdate,"base-veeam-api-url/query?type=VmRestorePoint&format=Entities&filter=HierarchyObjRef==%22"+vobjid+"%22;CreationTime%3E"+backupdate as url
 CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value

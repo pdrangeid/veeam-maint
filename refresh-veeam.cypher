@@ -37,7 +37,7 @@ CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"v
 unwind value.Links as link
 WITH link where link.Type='HierarchyItemList' and link.Href ends with '=Vm'
 CALL apoc.load.jsonParams(link.Href,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value
-WITH *,"[^A-Za-z\\d-. _-]{1,63}" as regex1
+WITH *,"[^A-Za-z\\d-. _]{1,63}" as regex1
 unwind value.HierarchyItems as vmobject
 WITH *,trim(apoc.text.regreplace(vmobject.ObjectName,regex1,'')) as cleanedname,split(vmobject.ObjectRef,'.')[1] as vmid
 MERGE (vvm:Veeamprotectedvm {id:vmid,name:cleanedname}) SET vvm.creation='VeeamAPI lookupSvc function'
@@ -80,4 +80,14 @@ FOREACH (ignoreMe in CASE WHEN exists(vsr.pendingupdate) then [1] ELSE [] END | 
 // Relate (vm:Virtualmachine) to (:Veeamprotectedvm) via name and vmid
 MATCH (vm:Virtualmachine) where not (vm)--(:Veeamprotectedvm)
 MATCH (vvm:Veeamprotectedvm) where vvm.id=vm.vmid and toLower(trim(vvm.name))=toLower(trim(vm.name))
-MERGE (vvm)<-[:BACKUP_VIA]-(vm)
+MERGE (vvm)<-[:BACKUP_VIA]-(vm);
+
+// Relate (vm:Virtualmachine) to (:Veeamprotectedvm) via name and vmid (with name cleaning)
+WITH *,"[^A-Za-z\\d-. _]{1,63}" as regex1
+MATCH (vvm:Veeamprotectedvm) where not (vvm)--(:Virtualmachine)
+MATCH (vm:Virtualmachine) where not (vm)--(:Veeamprotectedvm)
+WITH * where vvm.id=vm.vmid
+WITH *,trim(apoc.text.regreplace(vvm.name,regex1,'')) as cleanedvvmname
+WITH *,trim(apoc.text.regreplace(vm.name,regex1,'')) as cleanedvmname
+WITH * where cleanedvvmname=cleanedvmname
+MERGE (vvm)<-[:BACKUP_VIA]-(vm);

@@ -27,7 +27,7 @@ run as the same user account that is running init-veeam-wrapper.ps1
 │               : -days                        :how many days of backups to query             │ 
 │               : -init                        :Run Veeam importfor the first time            │ 
 │   PREREQS     :                                                                             │ 
-│               : RVTools (https://www.robware.net/rvtools/) v 3.11.6 or newer                │ 
+│               : Neo4j database with APOC plugin installed & configured                      │ 
 │               : Other scrpit modules:                                                       │ 
 │               : see SITE above for other modules needed to run this                         │ 
 └─────────────────────────────────────────────────────────────────────────────────────────────┘ 

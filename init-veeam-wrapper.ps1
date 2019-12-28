@@ -14,9 +14,9 @@ run as the same user account that is now running init-veeam-wrapper.ps1
 
 .NOTES 
 ┌─────────────────────────────────────────────────────────────────────────────────────────────┐ 
-│ get-datawarehouse-cache.ps1                                                                 │ 
+│ init-veeam-wrapper.ps1                                                                      │ 
 ├─────────────────────────────────────────────────────────────────────────────────────────────┤ 
-│   DATE        : 11.14.2019 				               									  │ 
+│   DATE        : 11.20.2019 				               									  │ 
 │   AUTHOR      : Paul Drangeid 			                   								  │ 
 │   SITE        : https://blog.graphcommit.com/                                               │ 
 │   PARAMETERS  : -baseapiurl                  :URL of your Veeam API including port          │ 
@@ -24,7 +24,8 @@ run as the same user account that is now running init-veeam-wrapper.ps1
 │               : -neo4jdatasource             :Datasource name for n4j location and creds    │ 
 │               : -nsessionkey                 :Don't run the script, just supply a valid key │ 
 │               : -verbosity                   :Level of on-screen messaging (0-4)            │ 
-│               : -days                        :If 1st run how many days of backups to query  │ 
+│               : -days                        :how many days of backups to query             │ 
+│               : -init                        :Run Veeam importfor the first time            │ 
 │   PREREQS     :                                                                             │ 
 │               : Credentials for the Veeam Backup Enterprise Manager webAPI                  │ 
 │               : Other script modules:                                                       │ 

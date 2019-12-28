@@ -58,7 +58,7 @@ UNWIND vmrestorepoints.VmRestorePoints as vmrestorepoint
 UNWIND vmrestorepoint.VmRestorePoints as restorepoint
 MERGE (vb:Veeambackup {name:restorepoint.Name}) SET vb.type=restorepoint.PointType,vb.algorithm=restorepoint.Algorithm,vb.creationtime=restorepoint.CreationTimeUTC
 MERGE (vb)-[:BACKUP_OF]->(vvm)
-WITH howsoonisnow,vb,restorepoint where not (vb)-[:PART_OF_JOB]->(:Veeamjob)
+WITH howsoonisnow,vb,restorepoint// where not (vb)-[:PART_OF_JOB]->(:Veeamjob)
 UNWIND restorepoint.Links as link
 WITH howsoonisnow,vb,link.Href as url where link.Type='RestorePointReference'
 CALL apoc.load.jsonParams(url,{Accept:"application/json",`X-RestSvcSessionId`:"veeam-restsvc-sessionid"},null) yield value

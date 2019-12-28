@@ -54,3 +54,8 @@ MATCH (lgb:Lastgoodbackup {name:'never'})
 MATCH (vpvm:Veeamprotectedvm) where not (vpvm)--(:Lastgoodbackup)
 MERGE (vpvm)-[:LAST_BACKUP_SUCCESS]->(lgb)
 RETURN vpvm,lgb;
+
+// SECTION Delete older (not latest) Veeam backups
+MATCH (l:Lastgoodbackup)--(v:Veeamprotectedvm) where not l.name='never'
+MATCH (b:Veeambackup)--(v) where b.creationtime<>v.lastgoodbackup
+detach delete b;
